@@ -2,29 +2,39 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ dev ]
+    branches: [main]
   pull_request:
-    branches: [ dev ]
+    branches: [main]
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      ARCJET_KEY: ${{ secrets.ARCJET_KEY }}
+
     steps:
-    - name: ⬇️ Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: 🟢 Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
 
-    - name: 📦 Install dependencies
-      run: npm install
+      - name: Install dependencies
+        run: npm install
 
-    - name: 🧪 Run tests
-      run: npm test || echo "No tests yet"
+      - name: Prisma Generate
+        run: npx prisma generate
 
-    - name: ⚡ Deploy to Vercel (Optional Step, setup next)
-      if: github.ref == 'refs/heads/dev'
-      run: echo "Deployment will be set up in next step"
+      - name: Build
+        run: npm run build
+
+      - name: Run tests
+        run: npm test
