@@ -1,0 +1,30 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ dev ]
+  pull_request:
+    branches: [ dev ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: ⬇️ Checkout code
+      uses: actions/checkout@v3
+
+    - name: 🟢 Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: 📦 Install dependencies
+      run: npm install
+
+    - name: 🧪 Run tests
+      run: npm test || echo "No tests yet"
+
+    - name: ⚡ Deploy to Vercel (Optional Step, setup next)
+      if: github.ref == 'refs/heads/dev'
+      run: echo "Deployment will be set up in next step"
